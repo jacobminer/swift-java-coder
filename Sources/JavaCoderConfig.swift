@@ -172,9 +172,9 @@ public struct JavaCoderConfig {
 
         RegisterType(type: Data.self, javaClassname: ByteBufferClassname, encodableClosure: {
             let valueData = $0 as! Data
-            let byteArray = JNI.api.NewByteArray(JNI.env, valueData.count)!
+            let byteArray = JNI.api.NewByteArray(JNI.env, jsize(valueData.count))!
             valueData.withUnsafeBytes({ (pointer: UnsafePointer<Int8>) -> Void in
-                JNI.api.SetByteArrayRegion(JNI.env, byteArray, 0, valueData.count, pointer)
+                JNI.api.SetByteArrayRegion(JNI.env, byteArray, 0, jsize(valueData.count), pointer)
             })
             return JNI.CallStaticObjectMethod(ByteBufferClass, methodID: ByteBufferWrap, args: [jvalue(l: byteArray)])!
         }, decodableClosure: {
@@ -186,7 +186,7 @@ public struct JavaCoderConfig {
             defer {
                 JNI.api.ReleaseByteArrayElements(JNI.env, byteArray, pointer, 0)
             }
-            return Data.init(bytes: pointer, count: length)
+            return Data.init(bytes: pointer, count: Int(length))
         })
     }
 
